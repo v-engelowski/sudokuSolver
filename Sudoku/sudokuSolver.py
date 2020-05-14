@@ -5,6 +5,7 @@ import cv2
 import pytesseract
 import os
 import shutil
+import threading
 
 try:
         os.mkdir("Sudoku//img") #creates dir to store screenshots
@@ -39,7 +40,6 @@ def getGrid():  #takes a screenshot of every tile and converts it to string
         sleep(0.25)     #wait before taking screenshot
 
         index = 0
-        ind = 0
 
         for y in yBox:
                 for x in xBox:
@@ -48,22 +48,39 @@ def getGrid():  #takes a screenshot of every tile and converts it to string
 
         py.hotkey("alt","tab")  #switch back to this window
 
+        threads = []
+
         for i in range(9):
-                for j in range(9):      #i and j are the numbers used to wirte to the grid array. i=0 and j=0 is the very first entry, i=0 and j=1 is the second entry of the first row and so on..
+                t = threading.Thread(target=scanImgThread, args=(i,))
+                threads.append(t)
+        
+        for i in threads:
+                i.start()
+        
+        for i in threads:
+                i.join()
+
+        #sleep(0.25)
+        py.hotkey("alt","tab")  #switch back to the puzzle
+        sleep(0.25)
+
+
+def scanImgThread(row):
+                global grid
+                ind = row * 9
+
+                for j in range(0,9):      #i and j are the numbers used to wirte to the grid array. i=0 and j=0 is the very first entry, i=0 and j=1 is the second entry of the first row and so on..
                         img = cv2.imread("Sudoku//img//grid" + str(ind) + ".png")
                         text = pytesseract.image_to_string(img,lang="eng", config ="--psm 10")  #--psm 10 determines that the whole file is one character
 
                         if text == "":  #if the text is empty, it's empty, therefor 0
-                                grid[i][j] = 0
+                                grid[row][j] = 0
                         else:
-                                grid[i][j] = int(text)
+                                grid[row][j] = int(text)
 
                         ind = ind + 1
                         os.system("cls")
                         print(np.matrix(grid))  #prints the grid to show the user the progress
-
-        #sleep(0.25)
-        py.hotkey("alt","tab")  #switch back to the puzzle
 
 
 def checkGrid(y,x,n):
@@ -119,13 +136,21 @@ def solve():
         print(np.matrix(grid))  #prints the solution for the puzzle
         solveGrid()     #then calls to solve the grid for you
 
-getGrid()
-solve()
+
+def main():
+        global grid
+        getGrid()
+        os.system("cls")
+        print("Solving")
+        solve()
+
+main()
+
 print("Done")
 input = input("Delete images? y/n\n")
 
 if input.lower() == "y":
         print("removing files..")
-        shutil.rmtree("Sudoku//img")    #remoevs images and directory
+        shutil.rmtree("Sudoku//img")    #removes images and directory
 
 print("Program finished")
