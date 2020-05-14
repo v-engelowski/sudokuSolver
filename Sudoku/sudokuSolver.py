@@ -50,9 +50,12 @@ def getGrid():  #takes a screenshot of every tile and converts it to string
 
         threads = []
 
-        for i in range(9):
-                t = threading.Thread(target=scanImgThread, args=(i,))
-                threads.append(t)
+        t = threading.Thread(target=scanImgThread, args=(0,))
+        threads.append(t)
+        t = threading.Thread(target=scanImgThread, args=(3,))
+        threads.append(t)
+        t = threading.Thread(target=scanImgThread, args=(6,))
+        threads.append(t)
         
         for i in threads:
                 i.start()
@@ -60,7 +63,6 @@ def getGrid():  #takes a screenshot of every tile and converts it to string
         for i in threads:
                 i.join()
 
-        #sleep(0.25)
         py.hotkey("alt","tab")  #switch back to the puzzle
         sleep(0.25)
 
@@ -69,18 +71,19 @@ def scanImgThread(row):
                 global grid
                 ind = row * 9
 
-                for j in range(0,9):      #i and j are the numbers used to wirte to the grid array. i=0 and j=0 is the very first entry, i=0 and j=1 is the second entry of the first row and so on..
-                        img = cv2.imread("Sudoku//img//grid" + str(ind) + ".png")
-                        text = pytesseract.image_to_string(img,lang="eng", config ="--psm 10")  #--psm 10 determines that the whole file is one character
+                for i in range(row,row+3):
+                        for j in range(0,9):      #i and j are the numbers used to wirte to the grid array. i=0 and j=0 is the very first entry, i=0 and j=1 is the second entry of the first row and so on..
+                                img = cv2.imread("Sudoku//img//grid" + str(ind) + ".png")
+                                text = pytesseract.image_to_string(img,lang="eng", config ="--psm 10")  #--psm 10 determines that the whole file is one character
 
-                        if text == "":  #if the text is empty, it's empty, therefor 0
-                                grid[row][j] = 0
-                        else:
-                                grid[row][j] = int(text)
+                                if text == "":  #if the text is empty, it's empty, therefor 0
+                                        grid[i][j] = 0
+                                else:
+                                        grid[i][j] = int(text)
 
-                        ind = ind + 1
-                        os.system("cls")
-                        print(np.matrix(grid))  #prints the grid to show the user the progress
+                                ind = ind + 1
+                                os.system("cls")
+                                print(np.matrix(grid))  #prints the grid to show the user the progress
 
 
 def checkGrid(y,x,n):
@@ -144,13 +147,6 @@ def main():
         print("Solving")
         solve()
 
+        print("Done")
+
 main()
-
-print("Done")
-input = input("Delete images? y/n\n")
-
-if input.lower() == "y":
-        print("removing files..")
-        shutil.rmtree("Sudoku//img")    #removes images and directory
-
-print("Program finished")
