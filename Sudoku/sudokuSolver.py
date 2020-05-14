@@ -13,7 +13,7 @@ except:
 
 pytesseract.pytesseract.tesseract_cmd = "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"       #location of the "tesseract.exe" which is used to extract text from an image to a string
 
-py.PAUSE = 0.01 #delay for py.* commands
+py.PAUSE = 0.001 #delay for py.* commands
 
 yRows = [265,320,375,430,485,540,595,655,710]   #x and y coordinaets pointing to the middle of the tile
 xRows = [390,445,500,555,610,665,720,775,830]
